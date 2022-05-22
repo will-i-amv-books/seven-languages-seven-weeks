@@ -1,0 +1,217 @@
+%% ##################################################################
+%% Day 2
+%% ##################################################################
+
+%% ######################
+%% Recursion
+%% ######################
+
+% Consider the following knowledge base of ancestors:
+
+father(zeb, john_boy_sr).
+father(john_boy_sr, john_boy_jr).
+
+ancestor(X, Y) :- father(X, Y).
+ancestor(X, Y) :- father(X, Z), ancestor(Z, Y).
+
+% Save the last snippet as 'family.pg', then load and query it:
+
+['family.pg'].
+ancestor(john_boy_sr, john_boy_jr).
+ancestor(zeb, john_boy_jr).
+
+% We can also try queries with variables:
+
+ancestor(zeb, Who). % Find all people that have 'zeb' as ancestor
+ancestor(Who, john_boy_jr). % Find all people who are ancestors of 'john_boy_jr'
+
+%% ######################
+%% Unification, Part 2
+%% ######################
+
+% Unification works with lists ans tuples, too
+
+(1, 2, 3) = (1, 2, 3).
+(1, 2, 3) = (3, 2, 1).
+(1, 2, 3) = (1, 2, 3, 4).
+
+% We can use variables inside tuples:
+
+(A, B, C) = (1, 2, 3).
+(1, 2, 3) = (A, B, C).
+(A, 2, C) = (1, B, 3).
+
+% Lists behave similarly
+
+[1, 2, 3] = [1, 2, 3].
+[1, 2, 3] = [X, Y, Z].
+[2, 2, 3] = [X, X, Z].
+[1, 2, 3] = [X, X, Z].
+[] = [].
+
+% We can deconstruct lists with [Head|Tail]:
+
+[a, b, c] = [Head|Tail].
+[] = [Head|Tail].
+[a] = [Head|Tail].
+
+% You can unify more complex combinations:
+
+[a, b, c] = [a|Tail].
+[a, b, c] = [a|[Head|Tail]].
+[a, b, c, d, e] = [_, _|[Head|_]].  The '_' unifies with anything
+
+%% ######################
+%% Lists and Math
+%% ######################
+
+% Examples of arithmetic operations with lists
+
+count(0, []).
+count(Count, [Head|Tail]) :- count(TailCount, Tail), Count is TailCount + 1.
+
+sum(0, []).
+sum(Total, [Head|Tail]) :- sum(Sum, Tail), Total is Head + Sum.
+
+average(Average, List) :- sum(Sum, List), count(Count, List), Average is Sum/Count.
+
+% Save the last snippet as 'lists_math.pg', then load and query it:
+
+['lists_math.pg'].
+count(What, [1, 2, 3]).
+sum(What, [1, 2, 3]).
+average(What, [1, 2, 3]).
+
+%% ######################
+% Using Rules in Both Directions
+%% ######################
+
+% The 'append' function check if the following holds true:
+
+append([item1], [item2], [item1, item2]).
+
+% Try it as follows:
+
+append([oil], [water], [oil, water]).
+append([oil], [water], [oil, slick]).
+
+% You can use 'append' to add lists
+
+append([tiny], [bubbles], What).
+
+% You can use 'append' to substract lists
+
+append([dessert_topping], Who, [dessert_topping, floor_wax]).
+
+% You can use 'append' even to compute list permutations
+
+append(One, Two, [apples, oranges, bananas]).
+
+%% ######################
+% A custom 'append'
+%% ######################
+
+/*
+We will write concatenate(List1, List2, List3) as follows:
+
+1. Write a rule that can concatenate an empty list to List1.
+2. Add a rule that concatenates one item from List1 onto List2.
+3. Add a rule that concatenates two and three items from List1 onto List2.
+4. See if we can generalize.
+*/
+
+% A rule to concatenate an empty list to a list 'List':
+
+concatenate([], List, List).
+
+% A rule to concatenate 'List1' (of length 1) to the front of 'List2':
+
+concatenate([], List, List).
+concatenate([Head|[]], List, [Head|List]).
+
+% A rule to concatenate 'List1' (of lengths 2 and 3) to the front of 'List2':
+
+concatenate([], List, List).
+concatenate([Head|[]], List, [Head|List]).
+concatenate([Head1|[Head2|[]]], List, [Head1, Head2|List]).
+concatenate([Head1|[Head2|[Head3|[]]]], List, [Head1, Head2, Head3|List]).
+
+% In summary, we have base case and a strategy where each subgoal 
+% shrinks the 1st list, keeps the 2nd list constant and grows the 3rd list.
+% So we can generalize 'concatenate' as follows:
+
+concatenate([], List, List).
+concatenate([Head|Tail1], List, [Head|Tail2]) :- concatenate(Tail1, List, Tail2).
+
+%% ######################
+%% Exercises for day 2
+%% ######################
+
+%% ######################
+% Find:
+
+% Implementations of a Fibonacci series and factorials.
+
+% Fibinacci:
+
+fib(0, 1) :- !.
+fib(1, 1) :- !.
+fib(N, Result) :- 
+    N1 is N - 1, 
+    N2 is N - 2, 
+    fib(N1, Result1), 
+    fib(N2, Result2), 
+    Result is Result1 + Result2.
+
+% Factorial:
+
+fact(1, 1).
+fact(N, Result) :- 
+    M is N - 1, 
+    fact(M, NextResult), 
+    Result is NextResult * N.
+
+% An implementation of the Towers of Hanoi.
+
+hanoi(N) :- move(N, left, center, right).
+ 
+move(0, _, _, _) :- !.
+move(N, A, B, C) :-
+    M is N - 1, 
+    move(M, A, C, B), 
+    inform(A, B), 
+    move(M, C, B, A).
+ 
+inform(X, Y) :- write([move, a, disk, from, the, X, pole, to, Y, pole]),  nl.
+
+%% ######################
+% Do:
+
+% Reverse the elements of a list.
+
+reverseList([X], X).
+reverseList([X|R], Result) :- reverse(R, T), append(T, [X], Result).
+
+reverseList([1, 2, 3, 4, 5], What).
+
+% Find the smallest element of a list.
+
+min(A, A, A).
+min(A, B, A) :- A < B.
+min(A, B, B) :- B < A.
+minList([X], X).
+minList([X|XS], M) :- minList(XS, M1), min(X, M1, M).
+
+minList([6, 2, 3, 5, 4], What).
+
+% Sort the elements of a list.
+
+takeout(X, [X|R], R).
+takeout(X, [F|R], [F|S]) :- takeout(X, R, S).
+sortList([X], [X]).
+sortList(List, [Min|Sorted]) :- 
+    minList(List, Min), 
+    takeout(Min, List, Rest), 
+    sortList(Rest, Sorted).
+
+sortList([6, 2, 3, 5, 4], What).
