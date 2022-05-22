@@ -1,0 +1,172 @@
+%% ##################################################################
+%% Day 1
+%% ##################################################################
+
+%% ######################
+%% Basic Facts
+%% ######################
+
+/*
+In Prolog, the case of the first letter is significant:
+- If a word begins with a lowercase character, it’s an atom. 
+- If it begins with an uppercase letter or an underscore, it’s a variable.
+*/
+
+% An example of prolog facts (1st 3 lines) and rules (4th line)
+
+likes(wallace, cheese).
+likes(grommit, cheese).
+likes(wendolene, sheep).
+friend(X, Y) :- \+(X = Y), likes(X, Z), likes(Y, Z).
+
+% Save the last snippet 'friends.pg' and load it to the interpreter
+% with the following command:
+
+['friends.pg']. % The extension is '.pg' for GNU prolog
+
+%% ######################
+%% Basic Inferences and Variables
+%% ######################
+
+% We can start writing queries about our facts in the interpreter, as follows:
+
+likes(wallace, sheep).
+likes(grommit, cheese).
+friend(wendolene, grommit).
+
+% Let’s try querying if a person is a friend of itself:
+% It will return 'no' because the first subgoal (\+(X = Y)) will fail
+
+friend(wallace, wallace). 
+
+%% ######################
+%% Filling in the Blanks
+%% ######################
+
+% Consider the following knowledge base:
+
+food_type(velveeta, cheese).
+food_type(ritz, cracker).
+food_type(spam, meat).
+food_type(sausage, meat).
+food_type(jolt, soda).
+food_type(twinkie, dessert).
+
+flavor(sweet, dessert).
+flavor(savory, meat).
+flavor(savory, cheese).
+flavor(sweet, soda).
+
+food_flavor(X, Y) :- food_type(X, Z), flavor(Y, Z).
+
+% Wwe can use a logical variable 'What' (with Capital lettters) 
+% to find all possible matches in a query, as follows:
+
+% Save the last snippet as 'food.pg' and load it:
+
+['food.pg'].
+
+% Then, start executing the following queries
+% (press ';' to get all thr answers of a query)
+
+food_type(What, meat). % Get food types that are of meat type
+
+food_flavor(sausage, sweet). % Check if sausage has sweet flavor
+food_flavor(What, savory). % Get foods that have savory flavor.
+
+flavor(sweet, What). % % Get food types that have sweet flavor.
+
+%% ######################
+%% Map Coloring
+%% ######################
+
+% We want to color a map of the southeastern US, and we don't want 
+% two states of the same color to touch
+
+% The last clause can be represented in the following knowledge base:
+
+different(red, green). different(red, blue).
+different(green, red). different(green, blue).
+different(blue, red). different(blue, green).
+
+coloring(Alabama, Mississippi, Georgia, Tennessee, Florida) :-
+    different(Mississippi, Tennessee),
+    different(Mississippi, Alabama),
+    different(Alabama, Tennessee),
+    different(Alabama, Mississippi),
+    different(Alabama, Georgia),
+    different(Alabama, Florida),
+    different(Georgia, Florida),
+    different(Georgia, Tennessee).
+
+% Save the last snippet as 'map.pg' and load it:
+
+['map.pg'].
+
+% Then execute the following query to get the color combinations
+% That satisfy the last knowledge base (press 'a' to get all posible combinations):
+
+coloring(Alabama, Mississippi, Georgia, Tennessee, Florida). 
+
+%% ######################
+%% Unification - part 1
+%% ######################
+
+% Unification just means "Find the values that make both sides match".
+% Consider the following knowledge base:
+
+cat(lion).
+cat(tiger).
+
+dorothy(X, Y, Z) :- X = lion, Y = tiger, Z = bear. %  The '=' means unify
+twin_cats(X, Y) :- cat(X), cat(Y).
+
+% Save the last snippet as 'map.pg' and load it:
+
+['ohmy.pg'].
+
+% Then execute the following queries:
+
+dorothy(lion, tiger, bear). % Unification returns 'yes'
+dorothy(One, Two, Three). % Unification returns 'One = lion, Two = tiger, Three = bear'
+twin_cats(One, Two). % Unification returns 'One = lion, Two = Lion?' 
+                     % (the ? means but there are more combinations,
+                     % to see all of them press 'a')
+
+%% ######################
+%% Exercises for day 1
+%% ######################
+
+
+% Make a simple knowledge base. Represent some of your favorite books and authors.
+
+book('Sapiens', 'Yuval Noah Harari').
+book('Antifragile', 'Nassim Taleb').
+book('The Black Swan', 'Nassim Taleb').
+book('The Blank Slate', 'Steven Pinker').
+book('Homo Deus', 'Yuval Noah Harari').
+book('Thinking, Fast and Slow', 'Daniel Kahneman').
+
+% Find all books in your knowledge base written by one author.
+
+book(What, 'Nassim Taleb').
+book(What, 'Yuval Noah Harari').
+
+% Make a knowledge base representing musicians and instruments.
+% Also represent musicians and their genre of music.
+
+musician_instrument('Michael Jackson', vocals).
+musician_instrument('Steve Harris', bass).
+musician_instrument('Rob Halford', vocals).
+musician_instrument('Steve Vai', guitar).
+musician_instrument('Neil Peart', battery).
+musician_instrument('Jimmy Page', guitar).
+
+musician_genre('Steve Harris', metal).
+musician_genre('Rob Halford', metal).
+musician_genre('Neil Peart', rock).
+musician_genre('Michael Jackson', pop).
+
+% Find all musicians who play the guitar.
+
+musician_instrument(What, guitar)
